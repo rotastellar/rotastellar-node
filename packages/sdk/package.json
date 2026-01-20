@@ -1,0 +1,44 @@
+{
+  "name": "@rotastellar/sdk",
+  "version": "0.0.1",
+  "description": "Node.js SDK for RotaStellar - Space Computing Infrastructure",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "space", "orbital", "satellite", "data-center", "space-computing",
+    "orbital-intelligence", "satellite-tracking"
+  ],
+  "author": {
+    "name": "Rota, Inc.",
+    "email": "hello@rotastellar.com",
+    "url": "https://rotastellar.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rotastellar/rotastellar-node.git",
+    "directory": "packages/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/rotastellar/rotastellar-node/issues"
+  },
+  "homepage": "https://rotastellar.com",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}

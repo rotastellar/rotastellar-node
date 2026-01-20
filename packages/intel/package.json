@@ -1,0 +1,27 @@
+{
+  "name": "@rotastellar/intel",
+  "version": "0.0.1",
+  "description": "Orbital intelligence and space situational awareness tools",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["space", "satellite-tracking", "conjunction-analysis", "tle"],
+  "author": {
+    "name": "Rota, Inc.",
+    "email": "hello@rotastellar.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rotastellar/rotastellar-node.git",
+    "directory": "packages/intel"
+  },
+  "homepage": "https://rotastellar.com/products/orbital-intelligence",
+  "engines": {"node": ">=18.0.0"},
+  "publishConfig": {"access": "public"},
+  "devDependencies": {"typescript": "^5.3.0"}
+}

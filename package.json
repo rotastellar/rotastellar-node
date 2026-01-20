@@ -1,0 +1,14 @@
+{
+  "name": "rotastellar-node",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "publish:all": "npm publish --workspaces --access public"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  }
+}
