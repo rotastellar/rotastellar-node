@@ -1,0 +1,41 @@
+{
+  "name": "@rotastellar/distributed",
+  "version": "0.0.1",
+  "description": "Distributed compute coordination for Earth-space AI workloads",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "space",
+    "distributed-computing",
+    "federated-learning",
+    "gradient-compression",
+    "earth-space-coordination",
+    "model-partitioning",
+    "orbital-compute"
+  ],
+  "author": {
+    "name": "Rota, Inc.",
+    "email": "hello@rotastellar.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rotastellar/rotastellar-node.git",
+    "directory": "packages/distributed"
+  },
+  "homepage": "https://rotastellar.com/products/distributed-compute",
+  "engines": {"node": ">=18.0.0"},
+  "publishConfig": {"access": "public"},
+  "devDependencies": {"typescript": "^5.3.0"},
+  "peerDependencies": {
+    "@tensorflow/tfjs": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tensorflow/tfjs": {"optional": true}
+  }
+}
