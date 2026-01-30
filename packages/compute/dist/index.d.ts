@@ -1,17 +1,25 @@
 /**
  * RotaStellar Compute - Orbital Compute Planning & Simulation
- * Coming Q1 2026.
+ *
+ * Tools for planning and simulating space-based data centers.
+ *
+ * Documentation: https://rotastellar.com/docs/compute
+ * GitHub: https://github.com/rotastellar/rotastellar-node
+ *
+ * @example
+ * import { FeasibilityCalculator, WorkloadType } from '@rotastellar/compute';
+ *
+ * const calculator = new FeasibilityCalculator({ apiKey: "rs_live_xxx" });
+ * const result = calculator.analyze({
+ *   workloadType: WorkloadType.INFERENCE,
+ *   computeTflops: 10,
+ *   memoryGb: 32
+ * });
+ * console.log(`Feasible: ${result.feasible}, Rating: ${result.rating}`);
  */
-export declare const VERSION = "0.0.1";
-export declare class FeasibilityCalculator {
-    constructor();
-}
-export declare class ThermalSimulator {
-    constructor();
-}
-export declare class LatencySimulator {
-    constructor();
-}
-export declare class PowerAnalyzer {
-    constructor();
-}
+export declare const VERSION = "0.1.0";
+export { FeasibilityCalculator, FeasibilityResult, FeasibilityRating, WorkloadProfile, WorkloadType, } from "./feasibility";
+export { ThermalSimulator, ThermalResult, ThermalConfig, ThermalEnvironment, OrbitType, } from "./thermal";
+export { LatencySimulator, LatencyResult, LatencyComponent, LinkType, } from "./latency";
+export { PowerAnalyzer, PowerBudget, PowerProfile, SolarConfig, BatteryConfig, SolarCellType, BatteryChemistry, } from "./power";
+//# sourceMappingURL=index.d.ts.map

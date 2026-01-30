@@ -281,8 +281,8 @@ export class ConjunctionAnalyzer {
       limit: options.limit ?? 100,
     });
 
-    return rawConjunctions.map((c) =>
-      Conjunction.fromDict(c as unknown as ConjunctionData)
+    return rawConjunctions.map((c: unknown) =>
+      Conjunction.fromDict(c as ConjunctionData)
     );
   }
 
