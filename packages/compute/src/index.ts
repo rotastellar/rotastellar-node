@@ -1,28 +1,58 @@
 /**
  * RotaStellar Compute - Orbital Compute Planning & Simulation
- * Coming Q1 2026.
+ *
+ * Tools for planning and simulating space-based data centers.
+ *
+ * Documentation: https://rotastellar.com/docs/compute
+ * GitHub: https://github.com/rotastellar/rotastellar-node
+ *
+ * @example
+ * import { FeasibilityCalculator, WorkloadType } from '@rotastellar/compute';
+ *
+ * const calculator = new FeasibilityCalculator({ apiKey: "rs_live_xxx" });
+ * const result = calculator.analyze({
+ *   workloadType: WorkloadType.INFERENCE,
+ *   computeTflops: 10,
+ *   memoryGb: 32
+ * });
+ * console.log(`Feasible: ${result.feasible}, Rating: ${result.rating}`);
  */
 
-export const VERSION = "0.0.1";
+export const VERSION = "0.1.0";
 
-const comingSoon = (name: string): never => {
-  throw new Error(
-    `${name} is not yet available. Launching Q1 2026. Visit https://rotastellar.com`
-  );
-};
+// Feasibility
+export {
+  FeasibilityCalculator,
+  FeasibilityResult,
+  FeasibilityRating,
+  WorkloadProfile,
+  WorkloadType,
+} from "./feasibility";
 
-export class FeasibilityCalculator {
-  constructor() { comingSoon("FeasibilityCalculator"); }
-}
+// Thermal
+export {
+  ThermalSimulator,
+  ThermalResult,
+  ThermalConfig,
+  ThermalEnvironment,
+  OrbitType,
+} from "./thermal";
 
-export class ThermalSimulator {
-  constructor() { comingSoon("ThermalSimulator"); }
-}
+// Latency
+export {
+  LatencySimulator,
+  LatencyResult,
+  LatencyComponent,
+  LinkType,
+} from "./latency";
 
-export class LatencySimulator {
-  constructor() { comingSoon("LatencySimulator"); }
-}
-
-export class PowerAnalyzer {
-  constructor() { comingSoon("PowerAnalyzer"); }
-}
+// Power
+export {
+  PowerAnalyzer,
+  PowerBudget,
+  PowerProfile,
+  SolarConfig,
+  BatteryConfig,
+  SolarCellType,
+  BatteryChemistry,
+} from "./power";

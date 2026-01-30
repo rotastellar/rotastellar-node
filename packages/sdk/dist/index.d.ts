@@ -6,26 +6,30 @@
  * Documentation: https://rotastellar.com/docs
  * GitHub: https://github.com/rotastellar/rotastellar-node
  *
- * Coming Q1 2026.
+ * @example
+ * import { RotaStellarClient, Position } from '@rotastellar/sdk';
+ *
+ * const client = new RotaStellarClient({ apiKey: "rs_live_xxx" });
+ *
+ * // List satellites
+ * const satellites = await client.listSatellites({ constellation: "starlink" });
+ * for (const sat of satellites) {
+ *   console.log(`${sat.name}: ${sat.noradId}`);
+ * }
+ *
+ * // Analyze orbital compute feasibility
+ * const result = await client.analyzeFeasibility({
+ *   workloadType: "inference",
+ *   computeTflops: 10,
+ *   dataGb: 1.5
+ * });
+ * console.log(`Feasible: ${result.feasible}`);
  */
-export declare const VERSION = "0.0.1";
-export declare class OrbitalCompute {
-    constructor(_options?: {
-        apiKey?: string;
-    });
-}
-export declare class OrbitalIntel {
-    constructor(_options?: {
-        apiKey?: string;
-    });
-}
-export declare class Simulator {
-    constructor(_options?: {
-        apiKey?: string;
-    });
-}
-export declare class Tracker {
-    constructor(_options?: {
-        apiKey?: string;
-    });
-}
+export declare const VERSION = "0.1.0";
+export { RotaStellarClient, ClientOptions } from "./client";
+export { Position, PositionData, Orbit, OrbitData, Satellite, SatelliteData, TimeRange, TimeRangeData, EARTH_RADIUS_KM, EARTH_MU, } from "./types";
+export { Config, ConfigOptions, getDefaultConfig, setDefaultConfig, } from "./config";
+export { RotaStellarError, AuthenticationError, MissingAPIKeyError, InvalidAPIKeyError, APIError, RateLimitError, NotFoundError, ValidationError, NetworkError, TimeoutError, } from "./errors";
+export { validateApiKey, maskApiKey, getAuthHeader } from "./auth";
+export { HTTPClient } from "./http";
+//# sourceMappingURL=index.d.ts.map

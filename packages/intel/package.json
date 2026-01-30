@@ -1,19 +1,35 @@
 {
   "name": "@rotastellar/intel",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Orbital intelligence and space situational awareness tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "npm run build"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build",
+    "test": "jest"
   },
-  "keywords": ["space", "satellite-tracking", "conjunction-analysis", "tle"],
+  "keywords": [
+    "space",
+    "satellite-tracking",
+    "conjunction-analysis",
+    "tle",
+    "orbital-mechanics",
+    "space-situational-awareness"
+  ],
   "author": {
-    "name": "Rota, Inc.",
-    "email": "hello@rotastellar.com"
+    "name": "Subhadip Mitra",
+    "email": "subhadipmitra@rotastellar.com",
+    "url": "https://rotastellar.com"
   },
+  "contributors": [
+    {
+      "name": "RotaStellar Research",
+      "email": "research@rotastellar.com"
+    }
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -23,5 +39,19 @@
   "homepage": "https://rotastellar.com/products/orbital-intelligence",
   "engines": {"node": ">=18.0.0"},
   "publishConfig": {"access": "public"},
-  "devDependencies": {"typescript": "^5.3.0"}
+  "dependencies": {
+    "@rotastellar/sdk": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "satellite.js": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "satellite.js": {
+      "optional": true
+    }
+  }
 }

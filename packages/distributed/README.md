@@ -1,12 +1,8 @@
 # @rotastellar/distributed
 
-Distributed compute coordination for Earth-space AI workloads.
+**Distributed Computing for Space Infrastructure**
 
-**Status:** Coming Q1 2026
-
-## Overview
-
-`@rotastellar/distributed` enables AI training and inference across hybrid Earth-space infrastructure. Coordinate federated learning, partition models optimally, and synchronize through bandwidth-constrained orbital links.
+Federated learning, model partitioning, gradient synchronization, and mesh networking for orbital compute clusters.
 
 ## Installation
 
@@ -14,95 +10,156 @@ Distributed compute coordination for Earth-space AI workloads.
 npm install @rotastellar/distributed
 ```
 
-## Features
+## Quick Start
 
 ### Federated Learning
 
 ```typescript
-import { FederatedClient, CompressionConfig } from '@rotastellar/distributed';
+import {
+  FederatedClient,
+  GradientAggregator,
+  AggregationStrategy,
+  CompressionConfig,
+  CompressionType
+} from '@rotastellar/distributed';
 
+// Configure gradient compression for limited bandwidth
 const compression = new CompressionConfig({
-  method: 'topk_quantized',
-  kRatio: 0.01,
-  quantizationBits: 8,
+  compressionType: CompressionType.TOP_K,
+  sparsity: 0.99,  // Keep top 1% of gradients
   errorFeedback: true
 });
 
+// Create federated client
 const client = new FederatedClient({
-  apiKey: '...',
-  nodeId: 'orbital-3',
-  nodeType: 'orbital',
+  nodeId: 'sat-001',
   compression
 });
 
-const gradients = client.trainStep(model, batch);
-client.sync(gradients, { priority: 'high' });
+// Compress gradients before transmission
+const gradients = model.getGradients();
+const compressed = client.compress(gradients);
+console.log(`Compression ratio: ${compressed.compressionRatio.toFixed(1)}x`);
+
+// Server-side aggregation
+const aggregator = new GradientAggregator({ strategy: AggregationStrategy.FEDAVG });
+const aggregated = aggregator.aggregate([grad1, grad2, grad3], { weights: [0.4, 0.3, 0.3] });
 ```
 
 ### Model Partitioning
 
 ```typescript
-import { PartitionOptimizer, ModelProfile } from '@rotastellar/distributed';
+import {
+  ModelProfile,
+  PartitionOptimizer,
+  NodeConfig,
+  NodeType
+} from '@rotastellar/distributed';
 
-const profile = ModelProfile.fromOnnx(model);
-
-const optimizer = new PartitionOptimizer({ apiKey: '...' });
-const partition = optimizer.optimize({
-  model: profile,
-  topology: {
-    groundNodes: 3,
-    orbitalNodes: 5,
-    groundFlops: 100e12,
-    orbitalFlops: 20e12
-  },
-  objective: 'minimize_latency'
-});
-```
-
-### Sync Scheduler
-
-```typescript
-import { SyncScheduler, GroundStation } from '@rotastellar/distributed';
-
-const scheduler = new SyncScheduler({
-  apiKey: '...',
-  groundStations: [
-    new GroundStation('svalbard', { lat: 78.2, lon: 15.6 }),
-    new GroundStation('singapore', { lat: 1.3, lon: 103.8 })
+// Profile your model
+const profile = new ModelProfile({
+  layers: [
+    { name: 'embedding', paramsMb: 100, flops: 1e9 },
+    { name: 'transformer_1', paramsMb: 200, flops: 5e9 },
+    { name: 'transformer_2', paramsMb: 200, flops: 5e9 },
+    { name: 'output', paramsMb: 50, flops: 1e8 }
   ]
 });
 
-const windows = scheduler.getWindows({ hours: 24 });
-scheduler.scheduleSync({
-  node: 'orbital-1',
-  dataSize: 50e6,
-  priority: 'critical'
-});
+// Define available nodes
+const nodes = [
+  new NodeConfig({ nodeId: 'sat-001', nodeType: NodeType.SATELLITE, memoryGb: 8, computeTflops: 2.0 }),
+  new NodeConfig({ nodeId: 'sat-002', nodeType: NodeType.SATELLITE, memoryGb: 8, computeTflops: 2.0 }),
+  new NodeConfig({ nodeId: 'ground-001', nodeType: NodeType.GROUND, memoryGb: 32, computeTflops: 10.0 })
+];
+
+// Optimize partitioning
+const optimizer = new PartitionOptimizer();
+const plan = optimizer.optimize(profile, nodes);
+console.log(`Partition plan: ${JSON.stringify(plan.assignments)}`);
+console.log(`Estimated latency: ${plan.estimatedLatencyMs.toFixed(1)} ms`);
 ```
 
-### Space Mesh
+### Synchronization Scheduling
 
 ```typescript
-import { SpaceMesh } from '@rotastellar/distributed';
+import { SyncScheduler, GroundStation } from '@rotastellar/distributed';
+import { Position } from '@rotastellar/sdk';
 
-const mesh = new SpaceMesh({ apiKey: '...' });
-const route = mesh.findRoute({
-  source: 'orbital-1',
-  destination: 'ground-svalbard',
-  maxHops: 3
+// Define ground stations
+const stations = [
+  new GroundStation({
+    name: 'KSC',
+    position: new Position({ latitude: 28.5729, longitude: -80.6490, altitudeKm: 0.0 }),
+    uplinkMbps: 100.0,
+    downlinkMbps: 200.0
+  }),
+  new GroundStation({
+    name: 'Svalbard',
+    position: new Position({ latitude: 78.2297, longitude: 15.3975, altitudeKm: 0.0 }),
+    uplinkMbps: 150.0,
+    downlinkMbps: 300.0
+  })
+];
+
+// Create scheduler
+const scheduler = new SyncScheduler({ groundStations: stations });
+
+// Get optimal sync windows
+const windows = scheduler.getSyncWindows({
+  satelliteId: 'sat-001',
+  durationHours: 24
 });
+
+for (const window of windows) {
+  console.log(`Station: ${window.station.name}`);
+  console.log(`Start: ${window.startTime.toISOString()}, Duration: ${window.durationSeconds}s`);
+  console.log(`Data capacity: ${window.dataCapacityMb.toFixed(1)} MB`);
+}
 ```
 
-## Documentation
+### Space Mesh Networking
 
-Full documentation: https://docs.rotastellar.com/sdks/node/distributed
+```typescript
+import { SpaceMesh, MeshNode } from '@rotastellar/distributed';
+import { Position } from '@rotastellar/sdk';
+
+// Create mesh network
+const mesh = new SpaceMesh();
+
+// Add nodes
+mesh.addNode(new MeshNode({ nodeId: 'sat-001', position: new Position({ latitude: 45.0, longitude: -122.0, altitudeKm: 550.0 }) }));
+mesh.addNode(new MeshNode({ nodeId: 'sat-002', position: new Position({ latitude: 46.0, longitude: -120.0, altitudeKm: 550.0 }) }));
+mesh.addNode(new MeshNode({ nodeId: 'sat-003', position: new Position({ latitude: 44.0, longitude: -118.0, altitudeKm: 550.0 }) }));
+
+// Add inter-satellite links
+mesh.addLink('sat-001', 'sat-002', { bandwidthMbps: 1000.0, latencyMs: 2.0 });
+mesh.addLink('sat-002', 'sat-003', { bandwidthMbps: 1000.0, latencyMs: 2.5 });
+
+// Find optimal route
+const route = mesh.findRoute('sat-001', 'sat-003');
+console.log(`Route: ${route.hops.join(' -> ')}`);
+console.log(`Total latency: ${route.totalLatencyMs.toFixed(1)} ms`);
+```
+
+## Features
+
+- **Federated Learning** — Privacy-preserving distributed training across orbital nodes
+- **Gradient Compression** — TopK, random sparsification, quantization for bandwidth-limited links
+- **Model Partitioning** — Intelligent layer placement across heterogeneous nodes
+- **Sync Scheduling** — Optimal ground station contact windows for data synchronization
+- **Mesh Networking** — Dynamic routing for inter-satellite communication
 
 ## Links
 
-- Website: https://rotastellar.com/products/distributed-compute
-- Interactive Demo: https://rotastellar.com/products/distributed-compute/demo
-- Research: https://rotastellar.com/research
+- **Website:** https://rotastellar.com/products/distributed
+- **Documentation:** https://docs.rotastellar.com/sdks/node/distributed
+- **Main SDK:** https://www.npmjs.com/package/@rotastellar/sdk
+
+## Author
+
+Created by [Subhadip Mitra](mailto:subhadipmitra@rotastellar.com) at [RotaStellar](https://rotastellar.com).
 
 ## License
 
-MIT License
+MIT License — Copyright (c) 2026 RotaStellar

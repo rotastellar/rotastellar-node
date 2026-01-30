@@ -1,24 +1,56 @@
 /**
  * RotaStellar Intel - Orbital Intelligence & Space Situational Awareness
- * Coming Q1 2026.
+ *
+ * Tools for tracking, analyzing, and monitoring orbital activity.
+ *
+ * Documentation: https://rotastellar.com/docs/intel
+ * GitHub: https://github.com/rotastellar/rotastellar-node
+ *
+ * @example
+ * import { Tracker, ConjunctionAnalyzer } from '@rotastellar/intel';
+ *
+ * // Track a satellite
+ * const tracker = new Tracker({ apiKey: "rs_live_xxx" });
+ * const iss = tracker.track("ISS");
+ * const pos = await iss.position();
+ * console.log(`ISS at ${pos.latitude.toFixed(2)}, ${pos.longitude.toFixed(2)}`);
+ *
+ * // Analyze conjunctions
+ * const analyzer = new ConjunctionAnalyzer({ apiKey: "rs_live_xxx" });
+ * const conjunctions = await analyzer.getHighRiskConjunctions();
+ * for (const c of conjunctions) {
+ *   console.log(`${c.primaryName} - ${c.missDistanceKm.toFixed(2)} km`);
+ * }
  */
 
-export const VERSION = "0.0.1";
+export const VERSION = "0.1.0";
 
-const comingSoon = (name: string): never => {
-  throw new Error(
-    `${name} is not yet available. Launching Q1 2026. Visit https://rotastellar.com`
-  );
-};
+// Tracker
+export {
+  Tracker,
+  TrackedSatellite,
+  GroundStation,
+  SatellitePass,
+  SatellitePassData,
+} from "./tracker";
 
-export class Tracker {
-  constructor() { comingSoon("Tracker"); }
-}
+// TLE
+export { TLE, parseTle } from "./tle";
 
-export class ConjunctionAnalyzer {
-  constructor() { comingSoon("ConjunctionAnalyzer"); }
-}
+// Conjunctions
+export {
+  ConjunctionAnalyzer,
+  Conjunction,
+  ConjunctionData,
+  RiskLevel,
+  ManeuverRecommendation,
+} from "./conjunctions";
 
-export class PatternDetector {
-  constructor() { comingSoon("PatternDetector"); }
-}
+// Patterns
+export {
+  PatternDetector,
+  DetectedPattern,
+  DetectedPatternData,
+  PatternType,
+  ConfidenceLevel,
+} from "./patterns";

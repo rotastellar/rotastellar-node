@@ -6,39 +6,69 @@
  * Documentation: https://rotastellar.com/docs
  * GitHub: https://github.com/rotastellar/rotastellar-node
  *
- * Coming Q1 2026.
+ * @example
+ * import { RotaStellarClient, Position } from '@rotastellar/sdk';
+ *
+ * const client = new RotaStellarClient({ apiKey: "rs_live_xxx" });
+ *
+ * // List satellites
+ * const satellites = await client.listSatellites({ constellation: "starlink" });
+ * for (const sat of satellites) {
+ *   console.log(`${sat.name}: ${sat.noradId}`);
+ * }
+ *
+ * // Analyze orbital compute feasibility
+ * const result = await client.analyzeFeasibility({
+ *   workloadType: "inference",
+ *   computeTflops: 10,
+ *   dataGb: 1.5
+ * });
+ * console.log(`Feasible: ${result.feasible}`);
  */
 
-export const VERSION = "0.0.1";
+export const VERSION = "0.1.0";
 
-const comingSoon = (name: string): never => {
-  throw new Error(
-    `${name} is not yet available. ` +
-      `The RotaStellar SDK is launching Q1 2026. ` +
-      `Visit https://rotastellar.com for updates.`
-  );
-};
+// Main client
+export { RotaStellarClient, ClientOptions } from "./client";
 
-export class OrbitalCompute {
-  constructor(_options?: { apiKey?: string }) {
-    comingSoon("OrbitalCompute");
-  }
-}
+// Types
+export {
+  Position,
+  PositionData,
+  Orbit,
+  OrbitData,
+  Satellite,
+  SatelliteData,
+  TimeRange,
+  TimeRangeData,
+  EARTH_RADIUS_KM,
+  EARTH_MU,
+} from "./types";
 
-export class OrbitalIntel {
-  constructor(_options?: { apiKey?: string }) {
-    comingSoon("OrbitalIntel");
-  }
-}
+// Configuration
+export {
+  Config,
+  ConfigOptions,
+  getDefaultConfig,
+  setDefaultConfig,
+} from "./config";
 
-export class Simulator {
-  constructor(_options?: { apiKey?: string }) {
-    comingSoon("Simulator");
-  }
-}
+// Errors
+export {
+  RotaStellarError,
+  AuthenticationError,
+  MissingAPIKeyError,
+  InvalidAPIKeyError,
+  APIError,
+  RateLimitError,
+  NotFoundError,
+  ValidationError,
+  NetworkError,
+  TimeoutError,
+} from "./errors";
 
-export class Tracker {
-  constructor(_options?: { apiKey?: string }) {
-    comingSoon("Tracker");
-  }
-}
+// Auth utilities
+export { validateApiKey, maskApiKey, getAuthHeader } from "./auth";
+
+// HTTP Client (for advanced usage)
+export { HTTPClient } from "./http";

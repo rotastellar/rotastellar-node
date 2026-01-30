@@ -1,6 +1,9 @@
 name: Publish to npm
 
 on:
+  push:
+    tags:
+      - 'v*'
   release:
     types: [published]
   workflow_dispatch:
@@ -23,7 +26,26 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish
-        run: npm publish --workspaces --access public
+      - name: Publish @rotastellar/sdk
+        run: cd packages/sdk && npm publish --access public
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @rotastellar/compute
+        run: cd packages/compute && npm publish --access public
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @rotastellar/intel
+        run: cd packages/intel && npm publish --access public
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @rotastellar/distributed
+        run: cd packages/distributed && npm publish --access public
+        continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
