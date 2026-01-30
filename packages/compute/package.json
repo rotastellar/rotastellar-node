@@ -1,6 +1,6 @@
 {
   "name": "@rotastellar/compute",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Orbital compute planning and simulation tools",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@rotastellar/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Node.js SDK for RotaStellar - Space Computing Infrastructure",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

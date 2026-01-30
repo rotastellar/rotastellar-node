@@ -1,6 +1,6 @@
 {
   "name": "@rotastellar/distributed",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Distributed compute coordination for Earth-space AI workloads",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
