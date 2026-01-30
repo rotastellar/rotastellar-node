@@ -11,6 +11,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for npm provenance / trusted publishing
     steps:
       - uses: actions/checkout@v4
 
@@ -27,25 +30,25 @@ jobs:
         run: npm run build
 
       - name: Publish @rotastellar/sdk
-        run: cd packages/sdk && npm publish --access public
+        run: cd packages/sdk && npm publish --access public --provenance
         continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @rotastellar/compute
-        run: cd packages/compute && npm publish --access public
+        run: cd packages/compute && npm publish --access public --provenance
         continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @rotastellar/intel
-        run: cd packages/intel && npm publish --access public
+        run: cd packages/intel && npm publish --access public --provenance
         continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @rotastellar/distributed
-        run: cd packages/distributed && npm publish --access public
+        run: cd packages/distributed && npm publish --access public --provenance
         continue-on-error: true
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
