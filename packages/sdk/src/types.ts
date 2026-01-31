@@ -336,3 +336,93 @@ export class Satellite {
     );
   }
 }
+
+/**
+ * Paginated response for list endpoints.
+ *
+ * Supports iteration and manual pagination.
+ *
+ * @example
+ * // Manual pagination
+ * let page = await client.listSatellites({ constellation: "starlink", limit: 100 });
+ * for (const sat of page.items) {
+ *   console.log(sat.name);
+ * }
+ * if (page.hasMore) {
+ *   page = await page.nextPage();
+ * }
+ *
+ * @example
+ * // Async iteration (auto-pagination)
+ * for await (const sat of client.listSatellites({ constellation: "starlink" })) {
+ *   console.log(sat.name);
+ * }
+ */
+export class PaginatedResponse<T> {
+  public readonly items: T[];
+  public readonly hasMore: boolean;
+  public readonly total: number | undefined;
+  public readonly limit: number;
+  public readonly offset: number;
+  private readonly _fetchNext?: () => Promise<PaginatedResponse<T>>;
+
+  constructor(
+    items: T[],
+    hasMore: boolean,
+    total: number | undefined,
+    limit: number,
+    offset: number,
+    fetchNext?: () => Promise<PaginatedResponse<T>>
+  ) {
+    this.items = items;
+    this.hasMore = hasMore;
+    this.total = total;
+    this.limit = limit;
+    this.offset = offset;
+    this._fetchNext = fetchNext;
+  }
+
+  /** Number of items in current page. */
+  get length(): number {
+    return this.items.length;
+  }
+
+  /**
+   * Fetch the next page of results.
+   *
+   * @returns Promise resolving to the next page
+   * @throws Error if no more pages available
+   */
+  async nextPage(): Promise<PaginatedResponse<T>> {
+    if (!this.hasMore) {
+      throw new Error("No more pages available");
+    }
+    if (!this._fetchNext) {
+      throw new Error("No fetch function available for pagination");
+    }
+    return this._fetchNext();
+  }
+
+  /**
+   * Async iterator for auto-pagination.
+   *
+   * Automatically fetches next pages when current page is exhausted.
+   */
+  async *[Symbol.asyncIterator](): AsyncIterableIterator<T> {
+    let page: PaginatedResponse<T> | null = this;
+    while (page !== null) {
+      for (const item of page.items) {
+        yield item;
+      }
+      if (page.hasMore && page._fetchNext) {
+        page = await page._fetchNext();
+      } else {
+        page = null;
+      }
+    }
+  }
+
+  toString(): string {
+    return `PaginatedResponse(items=${this.items.length}, hasMore=${this.hasMore}, total=${this.total})`;
+  }
+}
