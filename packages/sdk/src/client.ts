@@ -148,6 +148,43 @@ export class RotaStellarClient {
     return Position.fromDict(response as unknown as PositionData);
   }
 
+  /**
+   * Get predicted trajectory for a satellite.
+   *
+   * @param options - Trajectory parameters
+   * @returns List of trajectory points
+   *
+   * @example
+   * const trajectory = await client.getTrajectory({
+   *   satelliteId: "25544",
+   *   start: new Date(),
+   *   end: new Date(Date.now() + 2 * 60 * 60 * 1000),
+   *   intervalSec: 60
+   * });
+   */
+  async getTrajectory(options: {
+    satelliteId: string;
+    start?: Date;
+    end?: Date;
+    intervalSec?: number;
+  }): Promise<Record<string, unknown>[]> {
+    const params: Record<string, unknown> = {
+      interval_sec: options.intervalSec ?? 60,
+    };
+    if (options.start) {
+      params.start = options.start.toISOString();
+    }
+    if (options.end) {
+      params.end = options.end.toISOString();
+    }
+
+    const response = await this.http.get(
+      `/satellites/${options.satelliteId}/trajectory`,
+      params
+    );
+    return (response.points as Record<string, unknown>[]) ?? [];
+  }
+
   // =========================================================================
   // Conjunction Analysis
   // =========================================================================
@@ -186,6 +223,42 @@ export class RotaStellarClient {
 
     const response = await this.http.get("/conjunctions", params);
     return (response.data as Record<string, unknown>[]) ?? [];
+  }
+
+  // =========================================================================
+  // Pattern Detection
+  // =========================================================================
+
+  /**
+   * Detect anomalies and maneuvers in satellite behavior.
+   *
+   * @param options - Pattern detection options
+   * @returns List of detected patterns
+   *
+   * @example
+   * const patterns = await client.listPatterns({
+   *   satelliteId: "44832",
+   *   lookbackDays: 30,
+   *   minConfidence: 0.8
+   * });
+   */
+  async listPatterns(options: {
+    satelliteId: string;
+    lookbackDays?: number;
+    patternType?: string;
+    minConfidence?: number;
+  }): Promise<Record<string, unknown>[]> {
+    const params: Record<string, unknown> = {
+      satellite: options.satelliteId,
+      lookback_days: options.lookbackDays ?? 30,
+      min_confidence: options.minConfidence ?? 0.7,
+    };
+    if (options.patternType) {
+      params.type = options.patternType;
+    }
+
+    const response = await this.http.get("/patterns", params);
+    return (response.patterns as Record<string, unknown>[]) ?? [];
   }
 
   // =========================================================================
