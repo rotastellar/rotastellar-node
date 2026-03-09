@@ -27,6 +27,23 @@ import {
 } from "./types";
 
 /**
+ * Satellite descriptor for constellation operations.
+ */
+export interface FleetMember {
+  satellite_id: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Fault injection parameters.
+ */
+export interface FaultParams {
+  satellite_id: string;
+  fault_type: string;
+  severity?: number;
+}
+
+/**
  * Client options for RotaStellarClient.
  */
 export interface ClientOptions extends ConfigOptions {}
@@ -54,6 +71,7 @@ export interface ClientOptions extends ConfigOptions {}
 export class RotaStellarClient {
   public readonly config: Config;
   public readonly http: HTTPClient;
+  private readonly simHttp: HTTPClient;
 
   /**
    * Initialize the RotaStellar client.
@@ -66,6 +84,13 @@ export class RotaStellarClient {
     this.config = new Config(options);
     validateApiKey(this.config.apiKey);
     this.http = new HTTPClient(this.config);
+
+    // Sim HTTP client (sim.rotastellar.com)
+    const simConfig = new Config({
+      ...options,
+      baseUrl: "https://sim.rotastellar.com/v1",
+    });
+    this.simHttp = new HTTPClient(simConfig);
   }
 
   /** Get the API key environment (test or live). */
@@ -351,6 +376,276 @@ export class RotaStellarClient {
       relay_count: options.relayCount ?? 0,
     };
     return this.http.post("/planning/latency", data);
+  }
+
+  // =========================================================================
+  // Constellation Operations
+  // =========================================================================
+
+  /**
+   * Plan compute across a constellation of satellites.
+   *
+   * @param fleet - List of satellite descriptors
+   * @param presetId - Preset ID to apply to the fleet
+   * @param options - Additional planning parameters
+   * @returns Constellation plan with per-satellite assignments
+   *
+   * @example
+   * const plan = await client.planConstellation(
+   *   [{ satellite_id: "25544" }, { satellite_id: "44832" }],
+   *   "preset_edge_inference"
+   * );
+   * console.log(`Planned ${plan.assignments.length} assignments`);
+   */
+  async planConstellation(
+    fleet: FleetMember[],
+    presetId: string,
+    options: Record<string, unknown> = {}
+  ): Promise<Record<string, unknown>> {
+    const data = {
+      fleet,
+      preset_id: presetId,
+      ...options,
+    };
+    return this.http.post("/constellation/plan", data);
+  }
+
+  /**
+   * Generate Pareto-optimal plans for a constellation.
+   *
+   * @param fleet - List of satellite descriptors
+   * @param presetId - Preset ID to apply to the fleet
+   * @param options - Additional planning parameters
+   * @returns Set of Pareto-optimal plans trading off cost, latency, and coverage
+   *
+   * @example
+   * const result = await client.paretoConstellation(
+   *   [{ satellite_id: "25544" }],
+   *   "preset_edge_inference"
+   * );
+   * for (const front of result.pareto_front) {
+   *   console.log(`Cost: ${front.cost}, Latency: ${front.latency_ms}`);
+   * }
+   */
+  async paretoConstellation(
+    fleet: FleetMember[],
+    presetId: string,
+    options: Record<string, unknown> = {}
+  ): Promise<Record<string, unknown>> {
+    const data = {
+      fleet,
+      preset_id: presetId,
+      ...options,
+    };
+    return this.http.post("/constellation/pareto", data);
+  }
+
+  // =========================================================================
+  // Pareto Planning
+  // =========================================================================
+
+  /**
+   * Create a Pareto-optimal compute plan for a single satellite.
+   *
+   * @param satelliteId - Satellite ID or NORAD number
+   * @param presetId - Preset ID to use for planning
+   * @param options - Additional planning parameters
+   * @returns Pareto-optimal plan with trade-off frontiers
+   *
+   * @example
+   * const plan = await client.createParetoPlan("25544", "preset_edge_inference");
+   * console.log(`Optimal plans: ${plan.pareto_front.length}`);
+   */
+  async createParetoPlan(
+    satelliteId: string,
+    presetId: string,
+    options: Record<string, unknown> = {}
+  ): Promise<Record<string, unknown>> {
+    const data = {
+      satellite_id: satelliteId,
+      preset_id: presetId,
+      pareto: true,
+      ...options,
+    };
+    return this.http.post("/plan", data);
+  }
+
+  // =========================================================================
+  // Hazard Prediction
+  // =========================================================================
+
+  /**
+   * Predict orbital hazards for a satellite.
+   *
+   * Analyzes conjunction risk, radiation exposure, eclipse transitions,
+   * and debris proximity over the prediction window.
+   *
+   * @param satelliteId - Satellite ID or NORAD number
+   * @param predictionHours - Prediction window in hours (default: 24)
+   * @returns Hazard predictions with risk scores and timelines
+   *
+   * @example
+   * const hazards = await client.predictHazards("25544", 48);
+   * for (const h of hazards.hazards) {
+   *   console.log(`${h.type}: risk=${h.risk_score.toFixed(2)}`);
+   * }
+   */
+  async predictHazards(
+    satelliteId: string,
+    predictionHours: number = 24
+  ): Promise<Record<string, unknown>> {
+    const data = {
+      satellite_id: satelliteId,
+      prediction_hours: predictionHours,
+    };
+    return this.http.post("/hazards", data);
+  }
+
+  // =========================================================================
+  // OCU (Orbital Compute Unit) Operations
+  // =========================================================================
+
+  /**
+   * Negotiate an Orbital Compute Unit allocation for a satellite.
+   *
+   * Determines available compute capacity based on current power budget,
+   * thermal state, and contact window schedule.
+   *
+   * @param satelliteId - Satellite ID or NORAD number
+   * @param workloadPowerW - Requested workload power in watts (default: 50)
+   * @returns OCU allocation with compute capacity, duration, and constraints
+   *
+   * @example
+   * const ocu = await client.negotiateOcu("25544", 75);
+   * console.log(`Allocated: ${ocu.ocu_count} OCUs for ${ocu.duration_s}s`);
+   */
+  async negotiateOcu(
+    satelliteId: string,
+    workloadPowerW: number = 50
+  ): Promise<Record<string, unknown>> {
+    const data = {
+      satellite_id: satelliteId,
+      workload_power_w: workloadPowerW,
+    };
+    return this.http.post("/ocu/negotiate", data);
+  }
+
+  /**
+   * Get OCU capacity summary for a satellite bus class.
+   *
+   * @param busClass - Satellite bus class (e.g., "espa", "smallsat", "medium")
+   * @returns OCU summary with typical capacity, power budget, and thermal limits
+   *
+   * @example
+   * const summary = await client.getOcuSummary("smallsat");
+   * console.log(`Typical OCUs: ${summary.typical_ocu_count}`);
+   */
+  async getOcuSummary(
+    busClass: string
+  ): Promise<Record<string, unknown>> {
+    return this.http.get(`/ocu/summary/${busClass}`);
+  }
+
+  // =========================================================================
+  // Sim Sessions
+  // =========================================================================
+
+  /**
+   * Create a new simulation session.
+   *
+   * @param satellites - List of satellite configurations for the simulation
+   * @returns Session object with session_id and initial state
+   *
+   * @example
+   * const session = await client.createSession([
+   *   { satellite_id: "25544", preset_id: "preset_edge_inference" }
+   * ]);
+   * console.log(`Session: ${session.session_id}`);
+   */
+  async createSession(
+    satellites: Record<string, unknown>[]
+  ): Promise<Record<string, unknown>> {
+    const data = { satellites };
+    return this.simHttp.post("/sessions", data);
+  }
+
+  /**
+   * Get the current state of a simulation session.
+   *
+   * @param sessionId - Session ID returned from createSession
+   * @returns Session state with satellite positions, power levels, and events
+   *
+   * @example
+   * const state = await client.getSession("sess_abc123");
+   * console.log(`Sim time: ${state.sim_time}`);
+   */
+  async getSession(
+    sessionId: string
+  ): Promise<Record<string, unknown>> {
+    return this.simHttp.get(`/sessions/${sessionId}`);
+  }
+
+  /**
+   * Advance a simulation session by a time step.
+   *
+   * @param sessionId - Session ID
+   * @param durationS - Time step duration in seconds (default: 60)
+   * @returns Updated session state after the tick
+   *
+   * @example
+   * const result = await client.tickSession("sess_abc123", 120);
+   * console.log(`New sim time: ${result.sim_time}`);
+   */
+  async tickSession(
+    sessionId: string,
+    durationS: number = 60
+  ): Promise<Record<string, unknown>> {
+    const data = { duration_s: durationS };
+    return this.simHttp.post(`/sessions/${sessionId}/tick`, data);
+  }
+
+  /**
+   * Inject a fault into a simulated satellite.
+   *
+   * @param sessionId - Session ID
+   * @param params - Fault injection parameters
+   * @returns Fault injection result with affected subsystems
+   *
+   * @example
+   * const result = await client.injectFault("sess_abc123", {
+   *   satellite_id: "25544",
+   *   fault_type: "power_loss",
+   *   severity: 0.8
+   * });
+   * console.log(`Affected: ${result.affected_subsystems}`);
+   */
+  async injectFault(
+    sessionId: string,
+    params: FaultParams
+  ): Promise<Record<string, unknown>> {
+    const data = {
+      satellite_id: params.satellite_id,
+      fault_type: params.fault_type,
+      severity: params.severity ?? 0.5,
+    };
+    return this.simHttp.post(`/sessions/${sessionId}/fault`, data);
+  }
+
+  // =========================================================================
+  // Metrics
+  // =========================================================================
+
+  /**
+   * Get platform metrics and usage statistics.
+   *
+   * @returns Metrics including API usage, compute hours, active sessions, etc.
+   *
+   * @example
+   * const metrics = await client.getMetrics();
+   * console.log(`Compute hours: ${metrics.compute_hours}`);
+   */
+  async getMetrics(): Promise<Record<string, unknown>> {
+    return this.http.get("/metrics");
   }
 
   // =========================================================================

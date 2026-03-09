@@ -26,10 +26,10 @@
  * console.log(`Feasible: ${result.feasible}`);
  */
 
-export const VERSION = "0.1.0";
+export const VERSION = "0.2.0";
 
 // Main client
-export { RotaStellarClient, ClientOptions } from "./client";
+export { RotaStellarClient, ClientOptions, FleetMember, FaultParams } from "./client";
 
 // Types
 export {

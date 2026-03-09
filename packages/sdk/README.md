@@ -52,6 +52,26 @@ const range = new TimeRange({
 console.log(`Duration: ${range.durationHours.toFixed(1)} hours`);
 ```
 
+## API Key
+
+To use the RotaStellar API, you'll need an API key:
+
+```typescript
+import { RotaStellarClient } from '@rotastellar/sdk';
+
+// Demo key for testing (10 requests/minute limit)
+const client = new RotaStellarClient({ apiKey: 'rs_demo_rotastellar2026' });
+
+// Or get your own key at https://dashboard.rotastellar.com
+const client = new RotaStellarClient({ apiKey: 'rs_live_your_key_here' });
+```
+
+**Demo Key:** `rs_demo_rotastellar2026` — Rate limited to 10 requests/minute. Great for testing!
+
+**Get Your Own Key:** [dashboard.rotastellar.com](https://dashboard.rotastellar.com) — Higher limits, usage tracking.
+
+**Try the API:** [api.rotastellar.com/docs](https://api.rotastellar.com/docs) — Interactive Swagger UI.
+
 ## Features
 
 - **Position** — Geographic coordinates with altitude

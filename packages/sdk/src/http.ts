@@ -20,7 +20,7 @@ import {
  * Handles authentication, retries, rate limiting, and error responses.
  */
 export class HTTPClient {
-  private static readonly USER_AGENT = "rotastellar-node/0.1.0";
+  private static readonly USER_AGENT = "rotastellar-node/0.2.0";
   private config: Config;
   private requestCount: number = 0;
 
